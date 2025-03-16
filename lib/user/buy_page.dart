@@ -1,136 +1,126 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'dart:typed_data';
 import 'product_detail_page.dart';
 
-class BuyPage extends StatelessWidget {
+class BuyPage extends StatefulWidget {
+  @override
+  _BuyPageState createState() => _BuyPageState();
+}
+
+class _BuyPageState extends State<BuyPage> {
+  late Future<List<Map<String, dynamic>>> _productsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _productsFuture = fetchProducts();
+  }
+
+  // Fetch Products from API
+  Future<List<Map<String, dynamic>>> fetchProducts() async {
+    final response = await http.get(
+      Uri.parse("http://192.168.1.12:5000/get_collector_products"),
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      return List<Map<String, dynamic>>.from(data["products"]);
+    } else {
+      throw Exception("Failed to load products");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Product Sell"),
-      ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Product Sell",
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 20),
-            _buildProductItem(
-              context,
-              Icons.article,
-              "News paper",
-              "Used for recycling and packaging.",
-              "Rs 8/kg",
-            ),
-            _buildProductItem(
-              context,
-              Icons.book,
-              "Notebook",
-              "Old notebooks for recycling.",
-              "Rs 5/kg",
-            ),
-            _buildProductItem(
-              context,
-              Icons.menu_book,
-              "New book",
-              "Unused books for resale.",
-              "Rs 4/kg",
-            ),
-            _buildProductItem(
-              context,
-              Icons.library_books,
-              "Old book",
-              "Old books for recycling.",
-              "Rs 3/kg",
-            ),
-            _buildProductItem(
-              context,
-              Icons.article,
-              "Magazine",
-              "Old magazines for recycling.",
-              "Rs 1/kg",
-            ),
-            _buildProductItem(
-              context,
-              Icons.local_movies,
-              "Cartoons",
-              "Old cartoon books for recycling.",
-              "Rs 3/kg",
-            ),
-            _buildProductItem(
-              context,
-              Icons.local_drink,
-              "Plastic Bottles",
-              "Used plastic bottles for recycling.",
-              "Rs 5/kg",
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+      appBar: AppBar(title: Text("Product Sell")),
+      body: FutureBuilder<List<Map<String, dynamic>>>(
+        future: _productsFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text("Error: ${snapshot.error}"));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(child: Text("No products available"));
+          }
 
-  Widget _buildProductItem(
-    BuildContext context,
-    IconData icon,
-    String title,
-    String description,
-    String rate,
-  ) {
-    return Card(
-      elevation: 4,
-      margin: EdgeInsets.only(bottom: 16),
-      child: InkWell(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ProductDetailPage(
-                icon: icon,
-                title: title,
-                description: description,
-                rate: rate,
-              ),
-            ),
+          final products = snapshot.data!;
+
+          return ListView.builder(
+            padding: EdgeInsets.all(16),
+            itemCount: products.length,
+            itemBuilder: (context, index) {
+              final product = products[index];
+
+              // Decode base64 image if available
+              Uint8List? imageBytes;
+              try {
+                imageBytes = base64Decode(product["image_path"]);
+              } catch (e) {
+                imageBytes = null;
+              }
+
+              return Card(
+                elevation: 4,
+                margin: EdgeInsets.only(bottom: 16),
+                child: InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ProductDetailPage(
+                          icon: Icons.shopping_bag, // Placeholder icon
+                          title: product["product_name"],
+                          description: product["description"],
+                          rate: "₹${product["price"]}/kg",
+                        ),
+                      ),
+                    );
+                  },
+                  child: Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        imageBytes != null
+                            ? Image.memory(imageBytes, width: 60, height: 60, fit: BoxFit.cover)
+                            : Icon(Icons.image, size: 60, color: Colors.grey),
+                        SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                product["product_name"],
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              SizedBox(height: 4),
+                              Text(product["description"], style: TextStyle(color: Colors.grey)),
+                              SizedBox(height: 8),
+                              Text(
+                                "₹${product["price"]}/kg",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.green,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
           );
         },
-        child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Row(
-            children: [
-              Icon(icon, color: Colors.green, size: 40),
-              SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: 4),
-                    Text(description, style: TextStyle(color: Colors.grey)),
-                    SizedBox(height: 8),
-                    Text(
-                      rate,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.green,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

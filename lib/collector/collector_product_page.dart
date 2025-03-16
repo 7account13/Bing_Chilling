@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class CollectorProductPage extends StatefulWidget {
   @override
@@ -10,18 +12,77 @@ class CollectorProductPage extends StatefulWidget {
 class _CollectorProductPageState extends State<CollectorProductPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _priceController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
-  File? _imageFile;
+  final TextEditingController _priceController = TextEditingController();
+  File? _image;
   bool _isSubmitting = false;
 
+  // Pick Image
   Future<void> _pickImage() async {
     final pickedFile = await ImagePicker().pickImage(source: ImageSource.camera);
     if (pickedFile != null) {
       setState(() {
-        _imageFile = File(pickedFile.path);
+        _image = File(pickedFile.path);
       });
     }
+  }
+
+  // Send Data to API
+  Future<void> _submitData() async {
+    if (!_formKey.currentState!.validate() || _image == null) {
+      return;
+    }
+
+    setState(() {
+      _isSubmitting = true;
+    });
+
+    // Convert image to base64
+    List<int> imageBytes = await _image!.readAsBytes();
+    String base64Image = base64Encode(imageBytes);
+
+    final data = {
+      "product_name": _nameController.text,
+      "description": _descriptionController.text,
+      "price": double.parse(_priceController.text),
+      "image_path": base64Image // Sending image as base64
+    };
+
+    try {
+      final response = await http.post(
+        Uri.parse("http://192.168.1.12:5000/store_collector_product"),
+        headers: {"Content-Type": "application/json"},
+        body: json.encode(data),
+      );
+
+      if (response.statusCode == 201) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Product stored successfully!")),
+        );
+        _resetForm();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Failed to store product: ${response.body}")),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: $e")),
+      );
+    }
+
+    setState(() {
+      _isSubmitting = false;
+    });
+  }
+
+  void _resetForm() {
+    _nameController.clear();
+    _descriptionController.clear();
+    _priceController.clear();
+    setState(() {
+      _image = null;
+    });
   }
 
   @override
@@ -35,7 +96,7 @@ class _CollectorProductPageState extends State<CollectorProductPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Name Field
+              // Product Name
               TextFormField(
                 controller: _nameController,
                 decoration: InputDecoration(
@@ -51,27 +112,7 @@ class _CollectorProductPageState extends State<CollectorProductPage> {
               ),
               SizedBox(height: 20),
 
-              // Price Field
-              TextFormField(
-                controller: _priceController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: "Price",
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return "Please enter the price";
-                  }
-                  if (double.tryParse(value) == null) {
-                    return "Please enter a valid number";
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 20),
-
-              // Description Field
+              // Description
               TextFormField(
                 controller: _descriptionController,
                 decoration: InputDecoration(
@@ -88,7 +129,27 @@ class _CollectorProductPageState extends State<CollectorProductPage> {
               ),
               SizedBox(height: 20),
 
-              // Camera Function to Take Picture
+              // Price
+              TextFormField(
+                controller: _priceController,
+                decoration: InputDecoration(
+                  labelText: "Price",
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "Please enter a price";
+                  }
+                  if (double.tryParse(value) == null) {
+                    return "Please enter a valid number";
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 20),
+
+              // Photo Upload
               GestureDetector(
                 onTap: _pickImage,
                 child: Container(
@@ -98,27 +159,20 @@ class _CollectorProductPageState extends State<CollectorProductPage> {
                     border: Border.all(color: Colors.grey),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: _imageFile == null
+                  child: _image == null
                       ? Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          Icons.camera_alt,
-                          size: 40,
-                          color: Colors.grey,
-                        ),
+                        Icon(Icons.camera_alt, size: 40, color: Colors.grey),
                         SizedBox(height: 8),
-                        Text(
-                          "Take Picture",
-                          style: TextStyle(color: Colors.grey),
-                        ),
+                        Text("Take a Picture", style: TextStyle(color: Colors.grey)),
                       ],
                     ),
                   )
                       : ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: Image.file(_imageFile!, fit: BoxFit.cover),
+                    child: Image.file(_image!, fit: BoxFit.cover),
                   ),
                 ),
               ),
@@ -127,31 +181,7 @@ class _CollectorProductPageState extends State<CollectorProductPage> {
               // Submit Button
               Center(
                 child: ElevatedButton(
-                  onPressed: _isSubmitting
-                      ? null
-                      : () async {
-                    if (_formKey.currentState!.validate()) {
-                      setState(() {
-                        _isSubmitting = true;
-                      });
-
-                      // Simulate form submission (e.g., API call)
-                      await Future.delayed(Duration(seconds: 2));
-
-                      setState(() {
-                        _isSubmitting = false;
-                      });
-
-                      // Show animated pop-up
-                      _showSuccessPopup(context);
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
+                  onPressed: _isSubmitting ? null : _submitData,
                   child: _isSubmitting
                       ? CircularProgressIndicator(color: Colors.white)
                       : Text("Submit", style: TextStyle(fontSize: 18)),
@@ -161,36 +191,6 @@ class _CollectorProductPageState extends State<CollectorProductPage> {
           ),
         ),
       ),
-    );
-  }
-
-  void _showSuccessPopup(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.check_circle, size: 60, color: Colors.green),
-              SizedBox(height: 20),
-              Text(
-                "Your product has been registered!",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context); // Close the dialog
-              },
-              child: Text("OK"),
-            ),
-          ],
-        );
-      },
     );
   }
 }

@@ -1,11 +1,35 @@
 import 'package:flutter/material.dart';
 import 'notification_page.dart';
+import 'collector_product_page.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-class CollectorHomePage extends StatelessWidget {
-  final List<Map<String, String>> notifications = [
-    {"title": "Pickup Scheduled", "message": "Your pickup is confirmed for March 20th."},
-    {"title": "Eco Points Earned", "message": "You've earned 50 Eco Points!"},
-  ];
+class CollectorHomePage extends StatefulWidget {
+  @override
+  _CollectorHomePageState createState() => _CollectorHomePageState();
+}
+
+class _CollectorHomePageState extends State<CollectorHomePage> {
+  List<Map<String, dynamic>> products = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProducts();
+  }
+
+  Future<void> _loadProducts() async {
+    final response = await http.get(Uri.parse('http://192.168.1.12:5000/products_with_address'));
+
+    if (response.statusCode == 200) {
+      final List<dynamic> productList = json.decode(response.body);
+      setState(() {
+        products = List<Map<String, dynamic>>.from(productList);
+      });
+    } else {
+      print("Failed to load products: \${response.statusCode}");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,8 +73,8 @@ class CollectorHomePage extends StatelessWidget {
           children: [
             SizedBox(height: 40),
             _buildWelcomeSection(),
-            _buildEwasteSection(),
-            _buildNotificationSection(),
+            _buildActionButtons(context),
+            _buildProductList(),
           ],
         ),
       ),
@@ -102,40 +126,61 @@ class CollectorHomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildEwasteSection() {
+  Widget _buildActionButtons(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          Text(
-            "Domestic e-waste",
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.green.shade700,
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => CollectorProductPage()),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green.shade700,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
-            textAlign: TextAlign.center,
+            child: Text(
+              "Sell a By-Product",
+              style: TextStyle(fontSize: 18, color: Colors.white),
+            ),
           ),
-          SizedBox(height: 8),
-          Text(
-            "Individual customers can now easily schedule a pickup or drop-off and earn cash. Your journey to a greener planet starts here.",
-            style: TextStyle(fontSize: 16, color: Colors.grey.shade800),
-            textAlign: TextAlign.center,
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => NotificationPage()),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green.shade700,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Text(
+              "Pickups",
+              style: TextStyle(fontSize: 18, color: Colors.white),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildNotificationSection() {
+  Widget _buildProductList() {
     return Padding(
       padding: EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "Recent Notifications",
+            "Submitted Products",
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
@@ -143,19 +188,21 @@ class CollectorHomePage extends StatelessWidget {
             ),
           ),
           SizedBox(height: 16),
-          ...notifications.map((notification) => Card(
-            elevation: 4,
-            margin: EdgeInsets.symmetric(vertical: 8),
-            child: ListTile(
-              title: Text(notification['title']!,
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 18)),
-              subtitle: Text(notification['message']!,
-                  style: TextStyle(fontSize: 16)),
-              leading: Icon(Icons.notifications_active,
-                  color: Colors.green.shade700),
-            ),
-          )),
+          if (products.isEmpty)
+            Text("No products available.", style: TextStyle(fontSize: 18))
+          else
+            ...products.map((product) => Card(
+              elevation: 4,
+              margin: EdgeInsets.symmetric(vertical: 8),
+              child: ListTile(
+                title: Text(product['title'],
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 18)),
+                subtitle: Text("Address: \${product['address_line1']}, \${product['address_line2']}",
+                    style: TextStyle(fontSize: 16)),
+                leading: Icon(Icons.inventory, color: Colors.green.shade700),
+              ),
+            )),
         ],
       ),
     );

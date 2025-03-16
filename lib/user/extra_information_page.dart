@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'address_details_page.dart'; // Correct import for AddressDetailsPage
-import 'user_home_page.dart'; // Correct import for UserHomePage
+import 'address_details_page.dart';
+import 'user_home_page.dart';
 
 class ExtraInformationPage extends StatefulWidget {
   final String productType;
@@ -10,7 +10,7 @@ class ExtraInformationPage extends StatefulWidget {
   final String modelName;
   final String manufacturingYear;
 
-  // Constructor to accept parameters
+  // Constructor
   ExtraInformationPage({
     required this.productType,
     required this.condition,
@@ -41,20 +41,21 @@ class _ExtraInformationPageState extends State<ExtraInformationPage> {
         body: jsonEncode({
           "product_type": widget.productType,
           "condition": widget.condition,
-          "model_name": widget.modelName,
+          "model": widget.modelName,
           "manufacturing_year": widget.manufacturingYear,
         }),
       );
 
       if (response.statusCode == 200) {
         setState(() {
-          price = jsonDecode(response.body)['estimated_price'];
+          price = jsonDecode(response.body)['price'];
         });
       } else {
-        print('Failed to fetch price: ${response.statusCode}');
+        print('❌ Failed to fetch price: ${response.statusCode}');
+        print('Response: ${response.body}');
       }
     } catch (e) {
-      print('Error: $e');
+      print('❌ Error: $e');
     }
   }
 
@@ -70,15 +71,26 @@ class _ExtraInformationPageState extends State<ExtraInformationPage> {
             children: [
               Text(
                 "Estimated Price: ₹${price.toStringAsFixed(2)}",
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.green.shade700),
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.green.shade700,
+                ),
               ),
               SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
-                  // Navigate to AddressDetailsPage
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => AddressDetailsPage()),
+                    MaterialPageRoute(
+                      builder: (context) => AddressDetailsPage(
+                        productType: widget.productType,
+                        condition: widget.condition,
+                        modelName: widget.modelName,
+                        manufacturingYear: widget.manufacturingYear,
+                        price: price, // Pass the calculated price
+                      ),
+                    ),
                   );
                 },
                 child: Text("Go to Address Details"),
@@ -86,7 +98,6 @@ class _ExtraInformationPageState extends State<ExtraInformationPage> {
               SizedBox(height: 10),
               ElevatedButton(
                 onPressed: () {
-                  // Navigate to UserHomePage
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => UserHomePage()),

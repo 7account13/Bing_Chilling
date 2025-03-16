@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
 class CollectorProductPage extends StatefulWidget {
   @override
@@ -8,16 +10,24 @@ class CollectorProductPage extends StatefulWidget {
 class _CollectorProductPageState extends State<CollectorProductPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _dateController = TextEditingController();
+  final TextEditingController _priceController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
-  String _photoPath = "";
-
+  File? _imageFile;
   bool _isSubmitting = false;
+
+  Future<void> _pickImage() async {
+    final pickedFile = await ImagePicker().pickImage(source: ImageSource.camera);
+    if (pickedFile != null) {
+      setState(() {
+        _imageFile = File(pickedFile.path);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Collector Products")),
+      appBar: AppBar(title: Text("Sell By-Products")),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16),
         child: Form(
@@ -41,32 +51,20 @@ class _CollectorProductPageState extends State<CollectorProductPage> {
               ),
               SizedBox(height: 20),
 
-              // Date Field
+              // Price Field
               TextFormField(
-                controller: _dateController,
+                controller: _priceController,
+                keyboardType: TextInputType.number,
                 decoration: InputDecoration(
-                  labelText: "Date",
+                  labelText: "Price",
                   border: OutlineInputBorder(),
-                  suffixIcon: Icon(Icons.calendar_today),
                 ),
-                readOnly: true,
-                onTap: () async {
-                  DateTime? pickedDate = await showDatePicker(
-                    context: context,
-                    initialDate: DateTime.now(),
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime(2100),
-                  );
-                  if (pickedDate != null) {
-                    setState(() {
-                      _dateController.text =
-                          "${pickedDate.toLocal()}".split(' ')[0];
-                    });
-                  }
-                },
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return "Please select a date";
+                    return "Please enter the price";
+                  }
+                  if (double.tryParse(value) == null) {
+                    return "Please enter a valid number";
                   }
                   return null;
                 },
@@ -90,15 +88,9 @@ class _CollectorProductPageState extends State<CollectorProductPage> {
               ),
               SizedBox(height: 20),
 
-              // Photo Upload Field
+              // Camera Function to Take Picture
               GestureDetector(
-                onTap: () async {
-                  // Simulate photo upload (you can integrate with a file picker)
-                  setState(() {
-                    _photoPath =
-                        "assets/placeholder_image.png"; // Placeholder image
-                  });
-                },
+                onTap: _pickImage,
                 child: Container(
                   width: double.infinity,
                   height: 150,
@@ -106,28 +98,28 @@ class _CollectorProductPageState extends State<CollectorProductPage> {
                     border: Border.all(color: Colors.grey),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: _photoPath.isEmpty
+                  child: _imageFile == null
                       ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.upload,
-                                size: 40,
-                                color: Colors.grey,
-                              ),
-                              SizedBox(height: 8),
-                              Text(
-                                "Upload Photo",
-                                style: TextStyle(color: Colors.grey),
-                              ),
-                            ],
-                          ),
-                        )
-                      : ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: Image.asset(_photoPath, fit: BoxFit.cover),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.camera_alt,
+                          size: 40,
+                          color: Colors.grey,
                         ),
+                        SizedBox(height: 8),
+                        Text(
+                          "Take Picture",
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      ],
+                    ),
+                  )
+                      : ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.file(_imageFile!, fit: BoxFit.cover),
+                  ),
                 ),
               ),
               SizedBox(height: 20),
@@ -138,22 +130,22 @@ class _CollectorProductPageState extends State<CollectorProductPage> {
                   onPressed: _isSubmitting
                       ? null
                       : () async {
-                          if (_formKey.currentState!.validate()) {
-                            setState(() {
-                              _isSubmitting = true;
-                            });
+                    if (_formKey.currentState!.validate()) {
+                      setState(() {
+                        _isSubmitting = true;
+                      });
 
-                            // Simulate form submission (e.g., API call)
-                            await Future.delayed(Duration(seconds: 2));
+                      // Simulate form submission (e.g., API call)
+                      await Future.delayed(Duration(seconds: 2));
 
-                            setState(() {
-                              _isSubmitting = false;
-                            });
+                      setState(() {
+                        _isSubmitting = false;
+                      });
 
-                            // Show animated pop-up
-                            _showSuccessPopup(context);
-                          }
-                        },
+                      // Show animated pop-up
+                      _showSuccessPopup(context);
+                    }
+                  },
                   style: ElevatedButton.styleFrom(
                     padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                     shape: RoundedRectangleBorder(

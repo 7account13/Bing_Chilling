@@ -72,6 +72,20 @@ class _NotificationPageState extends State<NotificationPage> {
         itemCount: notifications.length,
         itemBuilder: (context, index) {
           final notification = notifications[index];
+
+          // Handle address construction
+          String address = [
+            notification['address_line1'],
+            notification['address_line2']
+          ].where((part) => part != null && part.isNotEmpty).join(', ');
+
+          if (address.isEmpty) {
+            address = 'N/A';
+          }
+
+          // Handle pickup date
+          String pickupDate = notification['pickup_date'] ?? 'N/A';
+
           return Card(
             elevation: 4,
             margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
@@ -80,11 +94,11 @@ class _NotificationPageState extends State<NotificationPage> {
                   style: TextStyle(
                       fontWeight: FontWeight.bold, fontSize: 18)),
               subtitle: Text(
-                  "Address: ${notification['address_line1'] ?? 'N/A'}, ${notification['address_line2'] ?? 'N/A'}\n" +
-                      "Product: ${notification['title'] ?? 'N/A'}\n" +
-                      "Model: ${notification['model_name'] ?? 'N/A'}\n" +
-                      "Condition: ${notification['condition'] ?? 'N/A'}\n" +
-                      "Pickup Date: ${notification['pickup_date'] ?? 'N/A'}",
+                  "Address: $address\n"
+                      "Product: ${notification['title'] ?? 'N/A'}\n"
+                      "Model: ${notification['model_name'] ?? 'N/A'}\n"
+                      "Condition: ${notification['condition'] ?? 'N/A'}\n"
+                      "Pickup Date: $pickupDate",
                   style: TextStyle(fontSize: 16)),
               leading: Icon(Icons.notifications_active,
                   color: Colors.green.shade700),

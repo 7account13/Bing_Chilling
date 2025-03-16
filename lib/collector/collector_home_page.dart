@@ -2,12 +2,17 @@ import 'package:flutter/material.dart';
 import 'notification_page.dart';
 
 class CollectorHomePage extends StatelessWidget {
+  final List<Map<String, String>> notifications = [
+    {"title": "Pickup Scheduled", "message": "Your pickup is confirmed for March 20th."},
+    {"title": "Eco Points Earned", "message": "You've earned 50 Eco Points!"},
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white), // Back icon with white color
+          icon: Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
         title: Row(
@@ -28,7 +33,6 @@ class CollectorHomePage extends StatelessWidget {
         centerTitle: true,
         backgroundColor: Colors.green.shade700,
         actions: [
-          // Notification Icon Button
           IconButton(
             icon: Icon(Icons.notifications, color: Colors.white),
             onPressed: () {
@@ -43,9 +47,10 @@ class CollectorHomePage extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            SizedBox(height: 40), // Leave some space on top
+            SizedBox(height: 40),
             _buildWelcomeSection(),
             _buildEwasteSection(),
+            _buildNotificationSection(),
           ],
         ),
       ),
@@ -53,52 +58,47 @@ class CollectorHomePage extends StatelessWidget {
   }
 
   Widget _buildWelcomeSection() {
-    return Column(
-      children: [
-        Container(
-          padding: EdgeInsets.all(16),
-          child: Column(
-            children: [
-              // E-waste collector icon with box shadow
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.green.withOpacity(0.3), // Replace with .withValues()
-                      blurRadius: 10,
-                      spreadRadius: 3,
-                      offset: Offset(0, 4),
-                    ),
-                  ],
+    return Container(
+      padding: EdgeInsets.all(16),
+      child: Column(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.green.withOpacity(0.3),
+                  blurRadius: 10,
+                  spreadRadius: 3,
+                  offset: Offset(0, 4),
                 ),
-                child: Icon(
-                  Icons.eco, // Use a relevant icon for e-waste collection
-                  size: 80,
-                  color: Colors.green.shade700,
-                ),
-              ),
-              SizedBox(height: 20),
-              Text(
-                "Welcome!",
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.green.shade700, // Green font color
-                ),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 16),
-              Text(
-                "Turn your e-waste into treasure",
-                style: TextStyle(fontSize: 18, color: Colors.grey.shade800),
-                textAlign: TextAlign.center,
-              ),
-            ],
+              ],
+            ),
+            child: Icon(
+              Icons.eco,
+              size: 80,
+              color: Colors.green.shade700,
+            ),
           ),
-        ),
-      ],
+          SizedBox(height: 20),
+          Text(
+            "Welcome!",
+            style: TextStyle(
+              fontSize: 32,
+              fontWeight: FontWeight.bold,
+              color: Colors.green.shade700,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 16),
+          Text(
+            "Turn your e-waste into treasure",
+            style: TextStyle(fontSize: 18, color: Colors.grey.shade800),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
     );
   }
 
@@ -123,45 +123,40 @@ class CollectorHomePage extends StatelessWidget {
             style: TextStyle(fontSize: 16, color: Colors.grey.shade800),
             textAlign: TextAlign.center,
           ),
-          SizedBox(height: 20),
-          _buildAnimatedButton(),
         ],
       ),
     );
   }
 
-  Widget _buildAnimatedButton() {
-    return AnimatedContainer(
-      duration: Duration(milliseconds: 500),
-      curve: Curves.easeInOut,
-      width: double.infinity,
-      height: 50,
-      decoration: BoxDecoration(
-        color: Colors.green.shade700,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.green.withOpacity(0.3), // Replace with .withValues()
-            blurRadius: 10,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
-      child: InkWell(
-        onTap: () {
-          // Add action for the button
-        },
-        borderRadius: BorderRadius.circular(12),
-        child: Center(
-          child: Text(
-            "For More Information",
+  Widget _buildNotificationSection() {
+    return Padding(
+      padding: EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Recent Notifications",
             style: TextStyle(
-              fontSize: 18,
+              fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: Colors.green.shade700,
             ),
           ),
-        ),
+          SizedBox(height: 16),
+          ...notifications.map((notification) => Card(
+            elevation: 4,
+            margin: EdgeInsets.symmetric(vertical: 8),
+            child: ListTile(
+              title: Text(notification['title']!,
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 18)),
+              subtitle: Text(notification['message']!,
+                  style: TextStyle(fontSize: 16)),
+              leading: Icon(Icons.notifications_active,
+                  color: Colors.green.shade700),
+            ),
+          )),
+        ],
       ),
     );
   }

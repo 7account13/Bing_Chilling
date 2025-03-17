@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'address_details_page.dart';
 import 'user_home_page.dart';
+import '../config.dart';
 
 class ExtraInformationPage extends StatefulWidget {
   final String productType;
@@ -32,7 +33,7 @@ class _ExtraInformationPageState extends State<ExtraInformationPage> {
   }
 
   Future<void> fetchPrice() async {
-    final url = Uri.parse('http://192.168.129.81:5000/get_price');
+    final url = Uri.parse('$BASE_URL/get_price');
 
     try {
       final response = await http.post(

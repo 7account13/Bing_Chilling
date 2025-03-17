@@ -3,6 +3,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../config.dart';
 
 class CollectorProductPage extends StatefulWidget {
   @override
@@ -50,7 +51,7 @@ class _CollectorProductPageState extends State<CollectorProductPage> {
 
     try {
       final response = await http.post(
-        Uri.parse("http://192.168.129.81:5000/store_collector_product"),
+        Uri.parse("$BASE_URL/store_collector_product"),
         headers: {"Content-Type": "application/json"},
         body: json.encode(data),
       );

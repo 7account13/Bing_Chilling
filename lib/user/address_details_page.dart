@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../config.dart';
 
 class AddressDetailsPage extends StatefulWidget {
   final String productType;
@@ -59,7 +60,8 @@ class _AddressDetailsPageState extends State<AddressDetailsPage> {
       return;
     }
 
-    final url = Uri.parse("http://192.168.129.81:5000/store_product_address");
+    final url = Uri.parse('$BASE_URL/store_product_address');
+
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},

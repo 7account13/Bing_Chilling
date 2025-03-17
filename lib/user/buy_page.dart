@@ -1,3 +1,4 @@
+import 'package:baba/config.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -21,7 +22,7 @@ class _BuyPageState extends State<BuyPage> {
   // Fetch Products from API
   Future<List<Map<String, dynamic>>> fetchProducts() async {
     final response = await http.get(
-      Uri.parse("http://192.168.129.81:5000/get_collector_products"),
+      Uri.parse("$BASE_URL/get_collector_products"),
     );
 
     if (response.statusCode == 200) {

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import '../config.dart';
 
 class RegisterPage extends StatefulWidget {
   final String role;
@@ -24,7 +25,7 @@ class _RegisterPageState extends State<RegisterPage> {
       return;
     }
 
-    final url = Uri.parse('http://192.168.129.81:5000/register'); // Change IP if needed
+    final url = Uri.parse('$BASE_URL/register'); // Change IP if needed
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},

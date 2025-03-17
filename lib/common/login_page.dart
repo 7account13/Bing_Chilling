@@ -5,6 +5,7 @@ import '/user/user_home_page.dart';
 import '/collector/collector_home_page.dart';
 import '/recycler/recycler_home_page.dart';
 import '/common/register_page.dart';
+import '../config.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -25,7 +26,7 @@ class _LoginPageState extends State<LoginPage> {
       _isLoading = true;
     });
 
-    final url = Uri.parse('http://192.168.129.81:5000/login');
+    final url = Uri.parse('$BASE_URL/login');
 
     try {
       final response = await http.post(

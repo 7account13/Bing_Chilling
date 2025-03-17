@@ -3,6 +3,7 @@ import 'notification_page.dart';
 import 'collector_product_page.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../config.dart';
 
 class CollectorHomePage extends StatefulWidget {
   @override
@@ -19,7 +20,7 @@ class _CollectorHomePageState extends State<CollectorHomePage> {
   }
 
   Future<void> _loadProducts() async {
-    final response = await http.get(Uri.parse('http://192.168.129.81:5000/products_with_address'));
+    final response = await http.get(Uri.parse('$BASE_URL/products_with_address'));
 
     if (response.statusCode == 200) {
       final List<dynamic> productList = json.decode(response.body);
@@ -35,10 +36,6 @@ class _CollectorHomePageState extends State<CollectorHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -64,6 +61,12 @@ class _CollectorHomePageState extends State<CollectorHomePage> {
                 context,
                 MaterialPageRoute(builder: (context) => NotificationPage()),
               );
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.logout, color: Colors.white),
+            onPressed: () {
+              // Handle logout logic here
             },
           ),
         ],

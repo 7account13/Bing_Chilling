@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'extra_information_page.dart';
-
+import '../config.dart';
 class ProductDetailPage extends StatefulWidget {
   final IconData icon;
   final String title;
@@ -60,7 +60,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
     try {
       var response = await http.post(
-        Uri.parse("http://192.168.129.81:5000/add_product"),
+        Uri.parse('$BASE_URL/add_product'),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(data),
       );

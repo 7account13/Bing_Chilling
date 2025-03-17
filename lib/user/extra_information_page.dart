@@ -32,7 +32,7 @@ class _ExtraInformationPageState extends State<ExtraInformationPage> {
   }
 
   Future<void> fetchPrice() async {
-    final url = Uri.parse('http://192.168.1.12:5000/get_price');
+    final url = Uri.parse('http://192.168.129.81:5000/get_price');
 
     try {
       final response = await http.post(

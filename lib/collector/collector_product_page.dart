@@ -50,7 +50,7 @@ class _CollectorProductPageState extends State<CollectorProductPage> {
 
     try {
       final response = await http.post(
-        Uri.parse("http://192.168.1.12:5000/store_collector_product"),
+        Uri.parse("http://192.168.129.81:5000/store_collector_product"),
         headers: {"Content-Type": "application/json"},
         body: json.encode(data),
       );

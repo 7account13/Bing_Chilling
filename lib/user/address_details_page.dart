@@ -59,7 +59,7 @@ class _AddressDetailsPageState extends State<AddressDetailsPage> {
       return;
     }
 
-    final url = Uri.parse("http://192.168.1.12:5000/store_product_address");
+    final url = Uri.parse("http://192.168.129.81:5000/store_product_address");
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},

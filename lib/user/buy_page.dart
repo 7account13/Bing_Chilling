@@ -21,7 +21,7 @@ class _BuyPageState extends State<BuyPage> {
   // Fetch Products from API
   Future<List<Map<String, dynamic>>> fetchProducts() async {
     final response = await http.get(
-      Uri.parse("http://192.168.1.12:5000/get_collector_products"),
+      Uri.parse("http://192.168.129.81:5000/get_collector_products"),
     );
 
     if (response.statusCode == 200) {
@@ -35,7 +35,7 @@ class _BuyPageState extends State<BuyPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Product Sell")),
+      appBar: AppBar(title: Text("Buy BY-Products")),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: _productsFuture,
         builder: (context, snapshot) {
@@ -103,7 +103,7 @@ class _BuyPageState extends State<BuyPage> {
                               Text(product["description"], style: TextStyle(color: Colors.grey)),
                               SizedBox(height: 8),
                               Text(
-                                "₹${product["price"]}/kg",
+                                "₹${product["price"]}/piece",
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,

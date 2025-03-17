@@ -19,7 +19,7 @@ class _CollectorHomePageState extends State<CollectorHomePage> {
   }
 
   Future<void> _loadProducts() async {
-    final response = await http.get(Uri.parse('http://192.168.1.12:5000/products_with_address'));
+    final response = await http.get(Uri.parse('http://192.168.129.81:5000/products_with_address'));
 
     if (response.statusCode == 200) {
       final List<dynamic> productList = json.decode(response.body);
@@ -180,7 +180,7 @@ class _CollectorHomePageState extends State<CollectorHomePage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "Submitted Products",
+            "Pick Up Products",
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,

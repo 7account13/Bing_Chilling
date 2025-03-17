@@ -24,7 +24,7 @@ class _RegisterPageState extends State<RegisterPage> {
       return;
     }
 
-    final url = Uri.parse('http://192.168.1.12:5000/register'); // Change IP if needed
+    final url = Uri.parse('http://192.168.129.81:5000/register'); // Change IP if needed
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},

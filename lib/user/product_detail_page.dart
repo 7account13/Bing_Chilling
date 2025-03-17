@@ -60,7 +60,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
     try {
       var response = await http.post(
-        Uri.parse("http://192.168.1.12:5000/add_product"),
+        Uri.parse("http://192.168.129.81:5000/add_product"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(data),
       );

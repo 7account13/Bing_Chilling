@@ -65,7 +65,7 @@ class UserHomePage extends StatelessWidget {
                         MaterialPageRoute(builder: (context) => BuyPage()),
                       );
                     },
-                    child: Text("Buy Recycled Items"),
+                    child: Text("Buy By-Products"),
                   ),
                 ),
               ],

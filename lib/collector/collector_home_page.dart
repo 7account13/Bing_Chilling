@@ -12,25 +12,9 @@ class CollectorHomePage extends StatefulWidget {
 }
 
 class _CollectorHomePageState extends State<CollectorHomePage> {
-  List<Map<String, dynamic>> products = [];
-
   @override
   void initState() {
     super.initState();
-    _loadProducts();
-  }
-
-  Future<void> _loadProducts() async {
-    final response = await http.get(Uri.parse('$BASE_URL/products_with_address'));
-
-    if (response.statusCode == 200) {
-      final List<dynamic> productList = json.decode(response.body);
-      setState(() {
-        products = List<Map<String, dynamic>>.from(productList);
-      });
-    } else {
-      print("Failed to load products: \${response.statusCode}");
-    }
   }
 
   @override
@@ -78,7 +62,6 @@ class _CollectorHomePageState extends State<CollectorHomePage> {
             SizedBox(height: 40),
             _buildWelcomeSection(),
             _buildActionButtons(context),
-            _buildProductList(),
           ],
         ),
       ),
@@ -177,42 +160,6 @@ class _CollectorHomePageState extends State<CollectorHomePage> {
       child: Text(
         text,
         style: TextStyle(fontSize: 18, color: Colors.white),
-      ),
-    );
-  }
-
-  Widget _buildProductList() {
-    return Padding(
-      padding: EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "Pick Up Products",
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.green.shade700,
-            ),
-          ),
-          SizedBox(height: 16),
-          if (products.isEmpty)
-            Text("No products available.", style: TextStyle(fontSize: 18))
-          else
-            ...products.map((product) => Card(
-              elevation: 4,
-              margin: EdgeInsets.symmetric(vertical: 8),
-              child: ListTile(
-                title: Text(product['title'],
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 18)),
-                subtitle: Text(
-                    "Address: \${product['address_line1']}, \${product['address_line2']}",
-                    style: TextStyle(fontSize: 16)),
-                leading: Icon(Icons.inventory, color: Colors.green.shade700),
-              ),
-            )),
-        ],
       ),
     );
   }

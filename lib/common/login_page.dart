@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '/user/user_home_page.dart';
 import '/collector/collector_home_page.dart';
-import '/recycler/recycler_home_page.dart';
+import '/recycler/recycler_home_page.dart'; // Adjust path if needed
+
 import '/common/register_page.dart';
 import '../config.dart';
 
@@ -52,6 +53,7 @@ class _LoginPageState extends State<LoginPage> {
           nextPage = CollectorHomePage();
         } else if (role == 'recycler') {
           nextPage = RecyclerHomePage();
+
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text("Invalid role received: $role")),

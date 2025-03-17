@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'notification_page.dart';
 import 'collector_product_page.dart';
 import 'sell_scrap_page.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import '../config.dart';
+import '/common/login_page.dart'; // Ensure you have a login page
 
 class CollectorHomePage extends StatefulWidget {
   @override
@@ -12,9 +10,14 @@ class CollectorHomePage extends StatefulWidget {
 }
 
 class _CollectorHomePageState extends State<CollectorHomePage> {
-  @override
-  void initState() {
-    super.initState();
+  // Logout function without SharedPreferences
+  void logout() {
+    // Navigate to Login Page and clear all previous routes
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => LoginPage()),
+          (route) => false, // Removes all previous routes
+    );
   }
 
   @override
@@ -50,9 +53,7 @@ class _CollectorHomePageState extends State<CollectorHomePage> {
           ),
           IconButton(
             icon: Icon(Icons.logout, color: Colors.white),
-            onPressed: () {
-              // Handle logout logic here
-            },
+            onPressed: logout, // Call logout function
           ),
         ],
       ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'notification_page.dart';
 import 'collector_product_page.dart';
+import 'sell_scrap_page.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../config.dart';
@@ -132,46 +133,50 @@ class _CollectorHomePageState extends State<CollectorHomePage> {
   Widget _buildActionButtons(BuildContext context) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      child: Column(
         children: [
-          ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => CollectorProductPage()),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green.shade700,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: Text(
-              "Sell a By-Product",
-              style: TextStyle(fontSize: 18, color: Colors.white),
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _buildElevatedButton("Sell a By-Product", () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => CollectorProductPage()),
+                );
+              }),
+              _buildElevatedButton("Pickups", () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => NotificationPage()),
+                );
+              }),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => NotificationPage()),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green.shade700,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: Text(
-              "Pickups",
-              style: TextStyle(fontSize: 18, color: Colors.white),
-            ),
-          ),
+          SizedBox(height: 16),
+          _buildElevatedButton("Sell Scrap", () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => SellScrapPage()),
+            );
+          }),
         ],
+      ),
+    );
+  }
+
+  Widget _buildElevatedButton(String text, VoidCallback onPressed) {
+    return ElevatedButton(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.green.shade700,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(fontSize: 18, color: Colors.white),
       ),
     );
   }
@@ -201,7 +206,8 @@ class _CollectorHomePageState extends State<CollectorHomePage> {
                 title: Text(product['title'],
                     style: TextStyle(
                         fontWeight: FontWeight.bold, fontSize: 18)),
-                subtitle: Text("Address: \${product['address_line1']}, \${product['address_line2']}",
+                subtitle: Text(
+                    "Address: \${product['address_line1']}, \${product['address_line2']}",
                     style: TextStyle(fontSize: 16)),
                 leading: Icon(Icons.inventory, color: Colors.green.shade700),
               ),

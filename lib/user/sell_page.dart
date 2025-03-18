@@ -49,7 +49,7 @@ class _SellPageState extends State<SellPage> {
             title: "Product Details",
             description: "Enter product details",
             rate: "\$100", // Example rate
-            imagePath: _selectedImage!.path,
+
           ),
         ),
       );

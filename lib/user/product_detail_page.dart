@@ -30,19 +30,27 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   final TextEditingController _manufacturingYearController = TextEditingController();
 
   final List<String> productTypes = [
-    "Smartphone", "Laptop", "Tablet", "Desktop Computer",
-    "Monitor", "Television", "Refrigerator", "Washing Machine",
-    "Air Conditioner", "Microwave Oven", "Printer", "Scanner",
-    "Keyboard", "Mouse", "Game Console", "Smartwatch",
-    "Digital Camera", "DVD Player", "Router", "Modem",
-    "Speakers", "Headphones", "Power Bank", "Electric Kettle",
-    "Induction Stove", "Vacuum Cleaner", "Hair Dryer",
-    "Electric Iron", "Charger", "Projector", "Set-Top Box",
-    "CCTV Camera", "UPS", "Server", "Graphics Card",
-    "Motherboard", "HDD", "SSD", "RAM Stick",
-    "Circuit Boards", "Battery Pack", "LED Bulbs",
-    "Electric Vehicle Battery", "eBike Charger",
+    "Air Conditioner", "Bar Phone", "Battery", "Blood Pressure Monitor",
+    "Boiler", "CRT Monitor", "CRT TV", "Calculator", "Camera",
+    "Ceiling Fan", "Christmas Lights", "Clothes Iron", "Coffee Machine",
+    "Compact Fluorescent Lamps", "Computer Keyboard", "Computer Mouse",
+    "Cooled Dispenser", "Cooling Display", "Dehumidifier", "Desktop PC",
+    "Digital Oscilloscope", "Dishwasher", "Drone", "Electric Bicycle",
+    "Electric Guitar", "Electrocardiograph Machine", "Electronic Keyboard",
+    "Exhaust Fan", "Flashlight", "Flat Panel Monitor", "Flat Panel TV",
+    "Floor Fan", "Freezer", "Glucose Meter", "HDD", "Hair Dryer",
+    "Headphone", "LED Bulb", "Laptop", "Microwave", "Music Player",
+    "Neon Sign", "Network Switch", "Non-Cooled Dispenser", "Oven", "PCB",
+    "Patient Monitoring System", "Photovoltaic Panel", "PlayStation 5",
+    "Power Adapter", "Printer", "Projector", "Pulse Oximeter", "Range Hood",
+    "Refrigerator", "Rotary Mower", "Router", "SSD", "Server",
+    "Smart Watch", "Smartphone", "Smoke Detector", "Soldering Iron",
+    "Speaker", "Stove", "Straight Tube Fluorescent Lamp", "Street Lamp",
+    "TV Remote Control", "Table Lamp", "Tablet", "Telephone Set",
+    "Toaster", "Tumble Dryer", "USB Flash Drive", "Vacuum Cleaner",
+    "Washing Machine", "Xbox Series X"
   ];
+
 
   Future<void> _sendDataToServer() async {
     String? imagePath = widget.imagePath;

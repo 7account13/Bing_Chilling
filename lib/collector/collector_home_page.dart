@@ -32,7 +32,8 @@ class _CollectorHomePageState extends State<CollectorHomePage> {
 
       for (var pickup in pickups) {
         DateTime date = DateTime.parse(pickup['pickup_date']).toLocal();
-        tempPickupCounts[date] = (tempPickupCounts[date] ?? 0) + 1;
+        tempPickupCounts[DateTime(date.year, date.month, date.day)] =
+            (tempPickupCounts[DateTime(date.year, date.month, date.day)] ?? 0) + 1;
       }
 
       setState(() {
@@ -49,8 +50,8 @@ class _CollectorHomePageState extends State<CollectorHomePage> {
 
       for (var scrap in scraps) {
         DateTime date = DateTime.parse(scrap['send_date']).toLocal();
-        print("Scrap send date: $date");  // Debugging log
-        tempScrapCounts[date] = (tempScrapCounts[date] ?? 0) + 1;
+        tempScrapCounts[DateTime(date.year, date.month, date.day)] =
+            (tempScrapCounts[DateTime(date.year, date.month, date.day)] ?? 0) + 1;
       }
 
       setState(() {
@@ -63,11 +64,11 @@ class _CollectorHomePageState extends State<CollectorHomePage> {
 
   Color getColorForDensity(int pickupCount, int scrapCount) {
     if (pickupCount > 0 && scrapCount > 0) {
-      return Colors.purple; // 🟣 Both pickups & scrap on same day
+      return Colors.purple; // Both pickups & scrap on same day
     } else if (pickupCount > 0) {
-      return Colors.green; // 🟢 Pickups
+      return Colors.green; // Pickups
     } else if (scrapCount > 0) {
-      return Colors.red; // 🔴 Scrap
+      return Colors.red; // Scrap
     } else {
       return Colors.transparent;
     }
@@ -102,23 +103,20 @@ class _CollectorHomePageState extends State<CollectorHomePage> {
         children: [
           SizedBox(height: 15),
 
-
+          // Buttons
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               ElevatedButton(
                 onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => CollectorProductPage())),
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
                 child: Text("Sell By-Product"),
               ),
               ElevatedButton(
                 onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => SellScrapPage())),
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
                 child: Text("Sell Scrap"),
               ),
               ElevatedButton(
                 onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => NotificationPage())),
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
                 child: Text("Pickups"),
               ),
             ],
@@ -126,7 +124,7 @@ class _CollectorHomePageState extends State<CollectorHomePage> {
 
           SizedBox(height: 15),
 
-          // 📅 Calendar
+          // Calendar
           Expanded(
             child: TableCalendar(
               firstDay: DateTime(2020),
@@ -141,8 +139,9 @@ class _CollectorHomePageState extends State<CollectorHomePage> {
               headerStyle: HeaderStyle(formatButtonVisible: false, titleCentered: true),
               calendarBuilders: CalendarBuilders(
                 defaultBuilder: (context, date, _) {
-                  int pickupCount = pickupCounts[date] ?? 0;
-                  int scrapCount = scrapCounts[date] ?? 0;
+                  DateTime normalizedDate = DateTime(date.year, date.month, date.day);
+                  int pickupCount = pickupCounts[normalizedDate] ?? 0;
+                  int scrapCount = scrapCounts[normalizedDate] ?? 0;
                   Color bgColor = getColorForDensity(pickupCount, scrapCount);
 
                   return Container(
@@ -163,32 +162,29 @@ class _CollectorHomePageState extends State<CollectorHomePage> {
             ),
           ),
 
-          SizedBox(height: 10), // 🟠 Space before legend
+          SizedBox(height: 10),
 
-          // 🔵 Legend
+          // Legend
           Padding(
             padding: EdgeInsets.all(10),
-            child: Column(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.circle, color: Colors.green, size: 14),
-                    SizedBox(width: 5),
-                    Text("Pickups"),
-                    SizedBox(width: 20),
-                    Icon(Icons.circle, color: Colors.red, size: 14),
-                    SizedBox(width: 5),
-                    Text("Scrap Sending"),
-                    SizedBox(width: 20),
-                    Icon(Icons.circle, color: Colors.purple, size: 14),
-                    SizedBox(width: 5),
-                    Text("Both"),
-                  ],
-                ),
+                Icon(Icons.circle, color: Colors.green, size: 14),
+                SizedBox(width: 5),
+                Text("Pickups"),
+                SizedBox(width: 20),
+                Icon(Icons.circle, color: Colors.red, size: 14),
+                SizedBox(width: 5),
+                Text("Scrap Sending"),
+                SizedBox(width: 20),
+                Icon(Icons.circle, color: Colors.purple, size: 14),
+                SizedBox(width: 5),
+                Text("Both"),
               ],
             ),
           ),
+
           SizedBox(height: 10),
         ],
       ),

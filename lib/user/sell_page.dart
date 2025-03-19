@@ -10,13 +10,13 @@ class SellPage extends StatefulWidget {
 }
 
 class _SellPageState extends State<SellPage> {
-  XFile? _selectedImage;
+  File? _selectedImage;
 
   Future<void> _pickImageFromGallery() async {
     final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() {
-        _selectedImage = pickedFile;
+        _selectedImage = File(pickedFile.path);
       });
     }
   }
@@ -31,7 +31,7 @@ class _SellPageState extends State<SellPage> {
         MaterialPageRoute(builder: (context) => CameraScreen(camera: camera)),
       );
 
-      if (result != null && result is XFile) {
+      if (result != null && result is File) {
         setState(() {
           _selectedImage = result;
         });
@@ -45,11 +45,11 @@ class _SellPageState extends State<SellPage> {
         context,
         MaterialPageRoute(
           builder: (context) => ProductDetailPage(
+            image: _selectedImage!, // ✅ Pass the selected image
             icon: Icons.device_hub, // Example icon
             title: "Product Details",
             description: "Enter product details",
             rate: "\$100", // Example rate
-
           ),
         ),
       );
@@ -79,7 +79,7 @@ class _SellPageState extends State<SellPage> {
                   border: Border.all(color: Colors.grey),
                 ),
                 child: _selectedImage != null
-                    ? Image.file(File(_selectedImage!.path), fit: BoxFit.cover)
+                    ? Image.file(_selectedImage!, fit: BoxFit.cover)
                     : Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -136,7 +136,7 @@ class _CameraScreenState extends State<CameraScreen> {
     try {
       await _initializeControllerFuture;
       final image = await _controller.takePicture();
-      Navigator.pop(context, image);
+      Navigator.pop(context, File(image.path));
     } catch (e) {
       print("Error taking picture: $e");
     }

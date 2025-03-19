@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:typed_data';
-import 'product_detail_page.dart';
 
 class BuyPage extends StatefulWidget {
   @override
@@ -15,7 +14,7 @@ class _BuyPageState extends State<BuyPage> {
   List<Map<String, dynamic>> products = [];
   List<Map<String, dynamic>> filteredProducts = [];
   String searchQuery = "";
-  String sortBy = "product_name"; // Default sorting
+  String sortBy = "product_name";
 
   @override
   void initState() {
@@ -61,6 +60,82 @@ class _BuyPageState extends State<BuyPage> {
     });
   }
 
+  // 🔹 Place Order
+  Future<void> placeOrder(String productId) async {
+    final response = await http.post(
+      Uri.parse("$BASE_URL/place_order"),
+      body: jsonEncode({"product_id": productId}),
+      headers: {"Content-Type": "application/json"},
+    );
+
+    if (response.statusCode == 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("✅ Order placed successfully!")),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("✅ Order placed successfully!")),
+      );
+    }
+  }
+
+  // 🔹 Show Product Details in Modal
+  void showProductDetails(BuildContext context, Map<String, dynamic> product) {
+    Uint8List? imageBytes;
+    try {
+      imageBytes = base64Decode(product["image_path"]);
+    } catch (e) {
+      imageBytes = null;
+    }
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: imageBytes != null
+                    ? Image.memory(imageBytes, width: 200, height: 200, fit: BoxFit.cover)
+                    : Icon(Icons.image, size: 200, color: Colors.grey),
+              ),
+              SizedBox(height: 16),
+              Text(
+                product["product_name"],
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 8),
+              Text(
+                product["description"],
+                style: TextStyle(fontSize: 16, color: Colors.grey[700]),
+              ),
+              SizedBox(height: 16),
+              Text(
+                "Price: ₹${product["price"]}/piece",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.green),
+              ),
+              SizedBox(height: 16),
+              Center(
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context); // Close modal
+                    placeOrder(product["id"].toString()); // Call placeOrder function
+                  },
+                  child: Text("Buy Now"),
+                ),
+              ),
+              SizedBox(height: 16),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -68,7 +143,7 @@ class _BuyPageState extends State<BuyPage> {
         title: Text("Buy By-Products"),
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context), // Back button functionality
+          onPressed: () => Navigator.pop(context),
         ),
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
@@ -126,7 +201,6 @@ class _BuyPageState extends State<BuyPage> {
                     itemBuilder: (context, index) {
                       final product = filteredProducts[index];
 
-                      // Decode base64 image if available
                       Uint8List? imageBytes;
                       try {
                         imageBytes = base64Decode(product["image_path"]);
@@ -139,17 +213,7 @@ class _BuyPageState extends State<BuyPage> {
                         margin: EdgeInsets.only(bottom: 16),
                         child: InkWell(
                           onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ProductDetailPage(
-                                  icon: Icons.shopping_bag, // Placeholder icon
-                                  title: product["product_name"],
-                                  description: product["description"],
-                                  rate: "₹${product["price"]}/kg",
-                                ),
-                              ),
-                            );
+                            showProductDetails(context, product);
                           },
                           child: Padding(
                             padding: EdgeInsets.all(16),

@@ -4,7 +4,6 @@ import 'package:http/http.dart' as http;
 import '/user/user_home_page.dart';
 import '/collector/collector_home_page.dart';
 import '/recycler/recycler_home_page.dart'; // Adjust path if needed
-
 import '/common/register_page.dart';
 import '../config.dart';
 

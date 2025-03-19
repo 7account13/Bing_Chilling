@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:table_calendar/table_calendar.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'notification_page.dart';
 import 'collector_product_page.dart';
 import 'sell_scrap_page.dart';
-import '/common/login_page.dart'; // Ensure you have a login page
+import '/common/login_page.dart';
+import '/config.dart';
 
 class CollectorHomePage extends StatefulWidget {
   @override
@@ -10,13 +14,70 @@ class CollectorHomePage extends StatefulWidget {
 }
 
 class _CollectorHomePageState extends State<CollectorHomePage> {
-  // Logout function without SharedPreferences
+  Map<DateTime, int> pickupCounts = {};
+  Map<DateTime, int> scrapCounts = {};
+
+  @override
+  void initState() {
+    super.initState();
+    fetchPickups();
+    fetchScrapDetails();
+  }
+
+  Future<void> fetchPickups() async {
+    final response = await http.get(Uri.parse('$BASE_URL/products_with_address'));
+    if (response.statusCode == 200) {
+      List<dynamic> pickups = json.decode(response.body);
+      Map<DateTime, int> tempPickupCounts = {};
+
+      for (var pickup in pickups) {
+        DateTime date = DateTime.parse(pickup['pickup_date']).toLocal();
+        tempPickupCounts[date] = (tempPickupCounts[date] ?? 0) + 1;
+      }
+
+      setState(() {
+        pickupCounts = tempPickupCounts;
+      });
+    }
+  }
+
+  Future<void> fetchScrapDetails() async {
+    final response = await http.get(Uri.parse('$BASE_URL/retrieve_scrap'));
+    if (response.statusCode == 200) {
+      List<dynamic> scraps = json.decode(response.body);
+      Map<DateTime, int> tempScrapCounts = {};
+
+      for (var scrap in scraps) {
+        DateTime date = DateTime.parse(scrap['send_date']).toLocal();
+        print("Scrap send date: $date");  // Debugging log
+        tempScrapCounts[date] = (tempScrapCounts[date] ?? 0) + 1;
+      }
+
+      setState(() {
+        scrapCounts = tempScrapCounts;
+      });
+    } else {
+      print("Failed to load scrap data: ${response.statusCode}");
+    }
+  }
+
+  Color getColorForDensity(int pickupCount, int scrapCount) {
+    if (pickupCount > 0 && scrapCount > 0) {
+      return Colors.purple; // 🟣 Both pickups & scrap on same day
+    } else if (pickupCount > 0) {
+      return Colors.green; // 🟢 Pickups
+    } else if (scrapCount > 0) {
+      return Colors.red; // 🔴 Scrap
+    } else {
+      return Colors.transparent;
+    }
+  }
+
   void logout() {
-    // Navigate to Login Page and clear all previous routes
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => LoginPage()),
-          (route) => false, // Removes all previous routes
+          (route) => false,
     );
   }
 
@@ -24,143 +85,112 @@ class _CollectorHomePageState extends State<CollectorHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.recycling, color: Colors.white),
-            SizedBox(width: 8),
-            Text(
-              "Bing Chilling",
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-          ],
+        title: Text(
+          "Bing Chilling",
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
         ),
         centerTitle: true,
         backgroundColor: Colors.green.shade700,
         actions: [
           IconButton(
-            icon: Icon(Icons.notifications, color: Colors.white),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => NotificationPage()),
-              );
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.logout, color: Colors.white),
-            onPressed: logout, // Call logout function
-          ),
+              icon: Icon(Icons.notifications, color: Colors.white),
+              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => NotificationPage()))),
+          IconButton(icon: Icon(Icons.logout, color: Colors.white), onPressed: logout),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            SizedBox(height: 40),
-            _buildWelcomeSection(),
-            _buildActionButtons(context),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildWelcomeSection() {
-    return Container(
-      padding: EdgeInsets.all(16),
-      child: Column(
+      body: Column(
         children: [
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.green.withOpacity(0.3),
-                  blurRadius: 10,
-                  spreadRadius: 3,
-                  offset: Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Icon(
-              Icons.eco,
-              size: 80,
-              color: Colors.green.shade700,
-            ),
-          ),
-          SizedBox(height: 20),
-          Text(
-            "Welcome!",
-            style: TextStyle(
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
-              color: Colors.green.shade700,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: 16),
-          Text(
-            "Turn your e-waste into treasure",
-            style: TextStyle(fontSize: 18, color: Colors.grey.shade800),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
+          SizedBox(height: 15),
 
-  Widget _buildActionButtons(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-      child: Column(
-        children: [
+
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _buildElevatedButton("Sell a By-Product", () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => CollectorProductPage()),
-                );
-              }),
-              _buildElevatedButton("Pickups", () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => NotificationPage()),
-                );
-              }),
+              ElevatedButton(
+                onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => CollectorProductPage())),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+                child: Text("Sell By-Product"),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => SellScrapPage())),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+                child: Text("Sell Scrap"),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => NotificationPage())),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
+                child: Text("Pickups"),
+              ),
             ],
           ),
-          SizedBox(height: 16),
-          _buildElevatedButton("Sell Scrap", () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => SellScrapPage()),
-            );
-          }),
-        ],
-      ),
-    );
-  }
 
-  Widget _buildElevatedButton(String text, VoidCallback onPressed) {
-    return ElevatedButton(
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.green.shade700,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(fontSize: 18, color: Colors.white),
+          SizedBox(height: 15),
+
+          // 📅 Calendar
+          Expanded(
+            child: TableCalendar(
+              firstDay: DateTime(2020),
+              lastDay: DateTime(2030),
+              focusedDay: DateTime.now(),
+              calendarFormat: CalendarFormat.month,
+              calendarStyle: CalendarStyle(
+                todayDecoration: BoxDecoration(color: Colors.blue.shade200, shape: BoxShape.circle),
+                selectedDecoration: BoxDecoration(color: Colors.blue, shape: BoxShape.circle),
+              ),
+              daysOfWeekStyle: DaysOfWeekStyle(weekendStyle: TextStyle(color: Colors.red)),
+              headerStyle: HeaderStyle(formatButtonVisible: false, titleCentered: true),
+              calendarBuilders: CalendarBuilders(
+                defaultBuilder: (context, date, _) {
+                  int pickupCount = pickupCounts[date] ?? 0;
+                  int scrapCount = scrapCounts[date] ?? 0;
+                  Color bgColor = getColorForDensity(pickupCount, scrapCount);
+
+                  return Container(
+                    margin: EdgeInsets.all(4),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: bgColor,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Text(
+                      '${date.day}',
+                      style: TextStyle(
+                          color: (pickupCount > 0 || scrapCount > 0) ? Colors.white : Colors.black),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+
+          SizedBox(height: 10), // 🟠 Space before legend
+
+          // 🔵 Legend
+          Padding(
+            padding: EdgeInsets.all(10),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.circle, color: Colors.green, size: 14),
+                    SizedBox(width: 5),
+                    Text("Pickups"),
+                    SizedBox(width: 20),
+                    Icon(Icons.circle, color: Colors.red, size: 14),
+                    SizedBox(width: 5),
+                    Text("Scrap Sending"),
+                    SizedBox(width: 20),
+                    Icon(Icons.circle, color: Colors.purple, size: 14),
+                    SizedBox(width: 5),
+                    Text("Both"),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: 10),
+        ],
       ),
     );
   }
